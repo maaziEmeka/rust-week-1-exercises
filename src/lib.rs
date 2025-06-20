@@ -1,14 +1,9 @@
 // Implement extract_tx_version function below
 pub fn extract_tx_version(raw_tx_hex: &str) -> Result<u32, String> {
-    let transaction_bytes = hex::decode(raw_tx_hex);
-    match transaction_bytes {
-        Ok(bytes) => {
-            if bytes.len() < 4 {
-                return Err("Transaction data too short".to_string());
-            }
-            let version_bytes = [bytes[0], bytes[1], bytes[2], bytes[3]];
-            Ok(u32::from_le_bytes(version_bytes))
-        }
-        Err(e) => Err(format!("Hex decode error: {}", e.to_string())),
+    if raw_tx_hex.len() < 8 {
+        return Err("Transaction data too short".to_string());
     }
+    let bytes = hex::decode(raw_tx_hex).map_err(|e| format!("Hex decode error: {}", e))?;
+    let version_bytes: [u8; 4] = bytes[..4].try_into().unwrap();
+    Ok(u32::from_le_bytes(version_bytes))
 }
